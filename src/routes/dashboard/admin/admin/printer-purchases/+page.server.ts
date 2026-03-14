@@ -40,7 +40,7 @@ export const actions = {
 
 		const userFilter = data.getAll('user').map((userId) => {
 			const parsedInt = parseInt(userId.toString());
-			if (!parsedInt) throw error(400, { message: 'malformed user filter' });
+			if (isNaN(parsedInt)) throw error(400, { message: 'malformed user filter' });
 			return parsedInt;
 		});
 
