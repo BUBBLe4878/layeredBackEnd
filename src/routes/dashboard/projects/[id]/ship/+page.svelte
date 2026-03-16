@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { enhance } from '$app/forms';
+	import { applyAction, deserialize } from '$app/forms';
 	import ChecklistItem from '$lib/components/ChecklistItem.svelte';
 	import Head from '$lib/components/Head.svelte';
 	import Project from '$lib/components/Project.svelte';
@@ -11,11 +11,12 @@
 	let { data, form }: PageProps = $props();
 
 	let formPending = $state(false);
+	let uploadError = $state<string | null>(null);
 
 	let printablesUrl = $state(data.project.url);
 	let editorUrl = $state(data.project.editorUrl);
-	let editorUploadFile = $state(null);
-	let modelFile = $state(null);
+	let editorUploadFile = $state<File | null>(null);
+	let modelFile = $state<File | null>(null);
 	let submitAsClub = $state(false);
 
 	let hasEditorFile = $derived((editorUrl || editorUploadFile) && !(editorUrl && editorUploadFile));
@@ -28,6 +29,90 @@
 			data.project.createdAt
 		)
 	);
+
+	let formElement: HTMLFormElement | undefined = $state();
+	let editorFileInput: HTMLInputElement | undefined = $state();
+	let modelFileInput: HTMLInputElement | undefined = $state();
+
+	async function getPresignedUrl(
+		uploadType: string,
+		contentType: string,
+		fileName: string,
+		fileSize: number
+	): Promise<{ presignedUrl: string; key: string }> {
+		const response = await fetch('/dashboard/upload/presign', {
+			method: 'POST',
+			headers: { 'Content-Type': 'application/json' },
+			body: JSON.stringify({ uploadType, contentType, fileName, fileSize })
+		});
+		if (!response.ok) {
+			throw new Error(`Failed to get presigned URL: ${response.statusText}`);
+		}
+		return response.json();
+	}
+
+	async function uploadToS3(presignedUrl: string, file: File): Promise<void> {
+		const response = await fetch(presignedUrl, {
+			method: 'PUT',
+			headers: { 'Content-Type': file.type },
+			body: file
+		});
+		if (!response.ok) {
+			throw new Error(`Upload failed: ${response.statusText}`);
+		}
+	}
+
+	async function handleSubmit(event: SubmitEvent) {
+		event.preventDefault();
+
+		if (!formElement) return;
+
+		formPending = true;
+		uploadError = null;
+
+		try {
+			const submitData = new FormData();
+			submitData.set('printables_url', printablesUrl ?? '');
+			submitData.set('editor_url', editorUrl ?? '');
+			submitData.set('submit_as_club', submitAsClub ? 'true' : 'false');
+
+			// Upload editor file if provided
+			if (editorUploadFile) {
+				const { presignedUrl, key } = await getPresignedUrl(
+					'ship_editor',
+					editorUploadFile.type || 'application/octet-stream',
+					editorUploadFile.name,
+					editorUploadFile.size
+				);
+				await uploadToS3(presignedUrl, editorUploadFile);
+				submitData.set('editorKey', key);
+			}
+
+			// Upload model file
+			if (modelFile) {
+				const { presignedUrl, key } = await getPresignedUrl(
+					'ship_model',
+					modelFile.type || 'application/octet-stream',
+					modelFile.name,
+					modelFile.size
+				);
+				await uploadToS3(presignedUrl, modelFile);
+				submitData.set('modelKey', key);
+			}
+
+			const response = await fetch(formElement.action, {
+				method: 'POST',
+				body: submitData
+			});
+
+			const result = deserialize(await response.text());
+			await applyAction(result);
+		} catch (e) {
+			uploadError = e instanceof Error ? e.message : 'Upload failed. Please try again.';
+		} finally {
+			formPending = false;
+		}
+	}
 </script>
 
 <Head title="Ship project" />
@@ -56,14 +141,8 @@
 <form
 	method="POST"
 	class="mt-3 flex flex-col gap-1"
-	enctype="multipart/form-data"
-	use:enhance={() => {
-		formPending = true;
-		return async ({ update }) => {
-			await update({ reset: false });
-			formPending = false;
-		};
-	}}
+	bind:this={formElement}
+	onsubmit={handleSubmit}
 >
 	<div>
 		<label class="flex flex-col gap-1">
@@ -112,9 +191,12 @@
 				<div class="mt-1 flex flex-row gap-2">
 					<label class="flex grow flex-col gap-1">
 						<input
+							bind:this={editorFileInput}
 							type="file"
 							name="editor_file"
-							bind:value={editorUploadFile}
+							onchange={() => {
+								editorUploadFile = editorFileInput?.files?.[0] ?? null;
+							}}
 							class="themed-input-on-box p-1 focus:outline-1"
 						/>
 					</label>
@@ -123,6 +205,7 @@
 							class="h-full cursor-pointer rounded-lg bg-primary-800 px-2 outline-primary-50 hover:bg-primary-700 hover:outline-3 focus:outline-3"
 							onclick={() => {
 								editorUploadFile = null;
+								if (editorFileInput) editorFileInput.value = '';
 							}}>Clear</button
 						>
 					</div>
@@ -148,10 +231,13 @@
 			3D model <span class="opacity-50">(for previews)</span>
 		</p>
 		<input
+			bind:this={modelFileInput}
 			type="file"
 			name="model_file"
 			accept=".3mf"
-			bind:value={modelFile}
+			onchange={() => {
+				modelFile = modelFileInput?.files?.[0] ?? null;
+			}}
 			class="themed-input-on-box p-1"
 		/>
 		{#if form?.invalid_model_file}
@@ -233,6 +319,12 @@
 			</p>
 		{/if}
 	</div>
+	{#if uploadError}
+		<p class="text-sm text-red-500">{uploadError}</p>
+	{/if}
+	{#if formPending}
+		<p class="text-sm opacity-70">Uploading files, please wait…</p>
+	{/if}
 	<div class="flex flex-row gap-2">
 		<div>
 			<a href="./" class="button sm primary">Cancel</a>
@@ -274,9 +366,7 @@
 				/>
 			</label>
 			{#if submitAsClub}
-				<p class="mt-2 opacity-80">
-					Club submissions do not receive personal currency rewards.
-				</p>
+				<p class="mt-2 opacity-80">Club submissions do not receive personal currency rewards.</p>
 			{:else}
 				<p class="mt-2">
 					You'll get <span class="font-bold"

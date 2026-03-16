@@ -7,7 +7,7 @@
 	import Devlog from '$lib/components/Devlog.svelte';
 	import { ALLOWED_IMAGE_TYPES, ALLOWED_MODEL_EXTS, MAX_UPLOAD_SIZE } from './config';
 	import { projectStatuses } from '$lib/utils';
-	import { enhance } from '$app/forms';
+	import { applyAction, deserialize } from '$app/forms';
 	import Head from '$lib/components/Head.svelte';
 	import ProjectLinks from '$lib/components/ProjectLinks.svelte';
 	import Spinny3DPreview from '$lib/components/Spinny3DPreview.svelte';
@@ -37,8 +37,11 @@
 	}
 
 	let formPending = $state(false);
+	let uploadError = $state<string | null>(null);
 	let imageInput: HTMLInputElement | undefined = $state();
+	let modelInput: HTMLInputElement | undefined = $state();
 	let imagePreviewUrl = $state<string | null>(null);
+	let formElement: HTMLFormElement | undefined = $state();
 
 	// Cleanup preview URL on component unmount
 	$effect(() => {
@@ -80,6 +83,126 @@
 					break;
 				}
 			}
+		}
+	}
+
+	// Strip EXIF metadata from an image using the Canvas API
+	function stripExif(file: File): Promise<File> {
+		return new Promise((resolve, reject) => {
+			const objectUrl = URL.createObjectURL(file);
+			const img = new Image();
+			img.onload = () => {
+				const canvas = document.createElement('canvas');
+				canvas.width = img.naturalWidth;
+				canvas.height = img.naturalHeight;
+				const ctx = canvas.getContext('2d');
+				if (!ctx) {
+					URL.revokeObjectURL(objectUrl);
+					reject(new Error('Could not get canvas context'));
+					return;
+				}
+				ctx.drawImage(img, 0, 0);
+				canvas.toBlob(
+					(blob) => {
+						URL.revokeObjectURL(objectUrl);
+						if (blob) {
+							resolve(new File([blob], file.name, { type: file.type }));
+						} else {
+							reject(new Error('Canvas toBlob failed'));
+						}
+					},
+					file.type,
+					0.95
+				);
+			};
+			img.onerror = () => {
+				URL.revokeObjectURL(objectUrl);
+				reject(new Error('Image load failed'));
+			};
+			img.src = objectUrl;
+		});
+	}
+
+	async function getPresignedUrl(
+		uploadType: string,
+		contentType: string,
+		fileName: string,
+		fileSize: number
+	): Promise<{ presignedUrl: string; key: string }> {
+		const response = await fetch('/dashboard/upload/presign', {
+			method: 'POST',
+			headers: { 'Content-Type': 'application/json' },
+			body: JSON.stringify({ uploadType, contentType, fileName, fileSize })
+		});
+		if (!response.ok) {
+			throw new Error(`Failed to get presigned URL: ${response.statusText}`);
+		}
+		return response.json();
+	}
+
+	async function uploadToS3(presignedUrl: string, file: File): Promise<void> {
+		const response = await fetch(presignedUrl, {
+			method: 'PUT',
+			headers: { 'Content-Type': file.type },
+			body: file
+		});
+		if (!response.ok) {
+			throw new Error(`Upload failed: ${response.statusText}`);
+		}
+	}
+
+	async function handleSubmit(event: SubmitEvent) {
+		event.preventDefault();
+
+		if (!formElement) return;
+
+		const imageFile = imageInput?.files?.[0];
+		const modelFile = modelInput?.files?.[0];
+
+		if (!imageFile || !modelFile) {
+			uploadError = 'Please select both an image and a 3D model file.';
+			return;
+		}
+
+		formPending = true;
+		uploadError = null;
+
+		try {
+			// Strip EXIF from image before upload (privacy protection)
+			const cleanImage = await stripExif(imageFile);
+
+			// Get presigned URLs and upload both files in parallel
+			const [
+				{ presignedUrl: imagePresignedUrl, key: imageKey },
+				{ presignedUrl: modelPresignedUrl, key: modelKey }
+			] = await Promise.all([
+				getPresignedUrl('devlog_image', cleanImage.type, cleanImage.name, cleanImage.size),
+				getPresignedUrl('devlog_model', modelFile.type, modelFile.name, modelFile.size)
+			]);
+
+			await Promise.all([
+				uploadToS3(imagePresignedUrl, cleanImage),
+				uploadToS3(modelPresignedUrl, modelFile)
+			]);
+
+			// Submit form with keys instead of file content
+			const submitData = new FormData();
+			submitData.set('description', description?.toString() ?? '');
+			submitData.set('timeSpent', String(timeSpent));
+			submitData.set('imageKey', imageKey);
+			submitData.set('modelKey', modelKey);
+
+			const response = await fetch(formElement.action, {
+				method: 'POST',
+				body: submitData
+			});
+
+			const result = deserialize(await response.text());
+			await applyAction(result);
+		} catch (e) {
+			uploadError = e instanceof Error ? e.message : 'Upload failed. Please try again.';
+		} finally {
+			formPending = false;
 		}
 	}
 </script>
@@ -176,15 +299,9 @@
 		<form
 			method="POST"
 			class="flex flex-col gap-3"
-			enctype="multipart/form-data"
 			onpaste={handlePaste}
-			use:enhance={() => {
-				formPending = true;
-				return async ({ update }) => {
-					await update();
-					formPending = false;
-				};
-			}}
+			bind:this={formElement}
+			onsubmit={handleSubmit}
 		>
 			<div class="flex flex-col gap-2">
 				<label class="flex flex-col gap-1">
@@ -274,6 +391,7 @@
 					<label class="flex grow flex-col gap-1">
 						3D model
 						<input
+							bind:this={modelInput}
 							type="file"
 							name="model"
 							accept={ALLOWED_MODEL_EXTS.join(', ')}
@@ -291,6 +409,12 @@
 					</label>
 				</div>
 			</div>
+			{#if uploadError}
+				<p class="text-sm text-red-500">{uploadError}</p>
+			{/if}
+			{#if formPending}
+				<p class="text-sm opacity-70">Uploading files, please wait…</p>
+			{/if}
 			<button type="submit" class="button md primary" disabled={formPending}
 				>Add journal entry!</button
 			>

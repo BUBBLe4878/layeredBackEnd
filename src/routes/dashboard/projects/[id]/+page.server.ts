@@ -3,23 +3,14 @@ import { devlog, project, user } from '$lib/server/db/schema.js';
 import { error, fail } from '@sveltejs/kit';
 import { eq, and, desc, sql, or } from 'drizzle-orm';
 import type { Actions } from './$types';
-import { extname } from 'path';
-import {
-	ALLOWED_IMAGE_TYPES,
-	ALLOWED_MODEL_EXTS,
-	ALLOWED_MODEL_TYPES,
-	MAX_UPLOAD_SIZE
-} from './config';
-import sharp from 'sharp';
+import { ALLOWED_IMAGE_TYPES, ALLOWED_MODEL_TYPES } from './config';
 import {
 	DEVLOG_DESCRIPTION_MAX_WORDS,
 	DEVLOG_DESCRIPTION_MIN_WORDS,
 	DEVLOG_MAX_TIME,
 	DEVLOG_MIN_TIME
 } from '$lib/defs';
-import { S3 } from '$lib/server/s3';
-import { PutObjectCommand } from '@aws-sdk/client-s3';
-import { env } from '$env/dynamic/private';
+import { verifyUpload } from '$lib/server/uploads';
 
 export async function load({ params, locals }) {
 	const id: number = parseInt(params.id);
@@ -133,8 +124,8 @@ export const actions = {
 		const data = await request.formData();
 		const description = data.get('description');
 		const timeSpent = data.get('timeSpent');
-		const imageFile = data.get('image') as File;
-		const modelFile = data.get('model') as File;
+		const imageKey = data.get('imageKey')?.toString();
+		const modelKey = data.get('modelKey')?.toString();
 
 		if (
 			!description ||
@@ -159,73 +150,44 @@ export const actions = {
 			});
 		}
 
-		// Validate image
-		if (!(imageFile instanceof File)) {
+		// Verify image upload
+		if (!imageKey || !imageKey.startsWith('images/')) {
 			return fail(400, {
 				fields: { description, timeSpent },
 				invalid_image_file: true
 			});
 		}
 
-		if (imageFile.size > MAX_UPLOAD_SIZE) {
+		const imageVerified = await verifyUpload(imageKey, ALLOWED_IMAGE_TYPES);
+		if (!imageVerified) {
 			return fail(400, {
 				fields: { description, timeSpent },
 				invalid_image_file: true
 			});
 		}
 
-		if (!ALLOWED_IMAGE_TYPES.includes(imageFile.type)) {
-			return fail(400, {
-				fields: { description, timeSpent },
-				invalid_image_file: true
-			});
-		}
-
-		const imagePath = `images/${crypto.randomUUID()}${extname(imageFile.name).toLowerCase()}`;
-
-		// Validate model
-		if (!(imageFile instanceof File) || modelFile.size > MAX_UPLOAD_SIZE) {
+		// Verify model upload
+		if (!modelKey || !modelKey.startsWith('models/')) {
 			return fail(400, {
 				fields: { description, timeSpent },
 				invalid_model_file: true
 			});
 		}
 
-		if (
-			!ALLOWED_MODEL_TYPES.includes(modelFile.type) ||
-			!ALLOWED_MODEL_EXTS.includes(extname(modelFile.name).toLowerCase())
-		) {
+		const modelVerified = await verifyUpload(modelKey, ALLOWED_MODEL_TYPES);
+		if (!modelVerified) {
 			return fail(400, {
 				fields: { description, timeSpent },
 				invalid_model_file: true
 			});
 		}
-
-		const modelPath = `models/${crypto.randomUUID()}${extname(modelFile.name).toLowerCase()}`;
-
-		const modelCommand = new PutObjectCommand({
-			Bucket: env.S3_BUCKET_NAME,
-			Key: modelPath,
-			Body: Buffer.from(await modelFile.arrayBuffer())
-		});
-		await S3.send(modelCommand);
-
-		// Remove Exif metadata and save (we don't want another Hack Club classic PII leak :D)
-		const imageBuffer = Buffer.from(await imageFile.arrayBuffer());
-
-		const imageCommand = new PutObjectCommand({
-			Bucket: env.S3_BUCKET_NAME,
-			Key: imagePath,
-			Body: await sharp(imageBuffer).toBuffer()
-		});
-		await S3.send(imageCommand);
 
 		await db.insert(devlog).values({
 			userId: locals.user.id,
 			projectId: queriedProject.id,
 			description: description.toString().trim(),
-			image: imagePath,
-			model: modelPath,
+			image: imageKey,
+			model: modelKey,
 			timeSpent: parseInt(timeSpent.toString()),
 			createdAt: new Date(Date.now()),
 			updatedAt: new Date(Date.now())
