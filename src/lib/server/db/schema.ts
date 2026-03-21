@@ -18,7 +18,7 @@ export const printerFulfilmentStatus = pgEnum('printer_fulfilment_status', [
 	'none',
 	'queued',
 	'approved',
-	'fulfilled',
+	'fulfilled'
 ]);
 
 export const user = pgTable('user', {
@@ -39,7 +39,7 @@ export const user = pgTable('user', {
 
 	hasBasePrinter: boolean().notNull().default(false),
 	printer: json().notNull().$type<{ path: number[] }>().default({ path: [] }),
-
+	printerFulfilment: printerFulfilmentStatus().notNull().default('none'),
 
 	hasT1Review: boolean().notNull().default(false), // Has access to t1 review
 	hasT2Review: boolean().notNull().default(false), // Has access to t2 review
@@ -339,7 +339,7 @@ export const currencyAuditLog = pgTable('currency_audit_log', {
 	oldClay: real().notNull(),
 	oldBrick: real().notNull(),
 	oldShopScore: real().notNull(),
-	
+
 	newClay: real().notNull(),
 	newBrick: real().notNull(),
 	newShopScore: real().notNull(),
