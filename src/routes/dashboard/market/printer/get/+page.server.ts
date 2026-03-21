@@ -8,6 +8,10 @@ export async function load({ locals }) {
 	if (!locals.user) {
 		throw error(500);
 	}
+
+	if (locals.user.printerFulfilment !== 'none' || !locals.user.hasBasePrinter) {
+		return redirect(303, '/dashboard/market/printer');
+	}
 }
 
 export const actions = {
@@ -16,20 +20,17 @@ export const actions = {
 			throw error(500);
 		}
 
-		await db
-			.update(project)
-			.set({
-				deleted: true,
-				updatedAt: new Date(Date.now())
-			})
-			.where(
-				and(
-					eq(project.id, queriedProject.id),
-					eq(project.userId, locals.user.id),
-					eq(project.deleted, false)
-				)
-			);
+		if (locals.user.printerFulfilment !== 'none' || !locals.user.hasBasePrinter) {
+			return redirect(303, '/dashboard/market/printer');
+		}
 
-		return redirect(303, '/dashboard/projects');
+		await db
+			.update(user)
+			.set({
+				printerFulfilment: 'queued'
+			})
+			.where(and(eq(user.id, locals.user.id), eq(user.printerFulfilment, 'none')));
+
+		return redirect(303, '/dashboard/market/printer');
 	}
 } satisfies Actions;
