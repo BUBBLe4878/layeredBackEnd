@@ -14,6 +14,13 @@ export const hackatimeTrustEnum = pgEnum('hackatime_trust', ['green', 'blue', 'y
 export const trustEnum = pgEnum('trust', ['green', 'blue', 'yellow', 'red']);
 export const clubRoleEnum = pgEnum('club_role', ['leader', 'member']);
 
+export const printerFulfilmentStatus = pgEnum('printer_fulfilment_status', [
+	'none',
+	'queued',
+	'approved',
+	'fulfilled',
+]);
+
 export const user = pgTable('user', {
 	id: serial().primaryKey(), // User ID
 	idvId: text().notNull().unique(), // IDV ID
@@ -32,6 +39,7 @@ export const user = pgTable('user', {
 
 	hasBasePrinter: boolean().notNull().default(false),
 	printer: json().notNull().$type<{ path: number[] }>().default({ path: [] }),
+
 
 	hasT1Review: boolean().notNull().default(false), // Has access to t1 review
 	hasT2Review: boolean().notNull().default(false), // Has access to t2 review
