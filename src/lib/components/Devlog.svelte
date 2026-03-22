@@ -2,7 +2,7 @@
 	// https://github.com/3daddict/stl-viewer/ and https://tonybox.net/posts/simple-stl-viewer/ for stl viewer code
 
 	import relativeDate from 'tiny-relative-date';
-	import { SquarePen, Trash } from '@lucide/svelte';
+	import { SquarePen, Trash, Video } from '@lucide/svelte';
 	import { page } from '$app/state';
 	import Spinny3DPreview from './Spinny3DPreview.svelte';
 
@@ -35,6 +35,17 @@
 			{relativeDate(devlog.createdAt)}
 		</abbr>
 		∙ {devlog.timeSpent} minutes
+		{#if devlog.lapseId}
+			∙
+			<a
+				href={`https://lapse.hackclub.com/timelapse/${devlog.lapseId}`}
+				class="font-medium text-primary-400 hover:text-primary-500 transition-colors"
+				target="_blank"
+			>
+				<Video size={18} class="inline" />
+				watch timelapse
+			</a>
+		{/if}
 	</p>
 	<p>
 		{devlog.description}

@@ -1,7 +1,6 @@
 <script lang="ts">
 	import CharCountedTextarea from '$lib/components/CharCountedTextarea.svelte';
-
-	import { SquarePen, ExternalLink, Trash, Ship, Lock, Download, Link } from '@lucide/svelte';
+	import { SquarePen, Trash, Ship, Lock } from '@lucide/svelte';
 	import relativeDate from 'tiny-relative-date';
 	import type { PageProps } from './$types';
 	import Devlog from '$lib/components/Devlog.svelte';
@@ -11,6 +10,7 @@
 	import Head from '$lib/components/Head.svelte';
 	import ProjectLinks from '$lib/components/ProjectLinks.svelte';
 	import Spinny3DPreview from '$lib/components/Spinny3DPreview.svelte';
+	import { getIdFromLapseUrl, getLapse, type Lapse } from '$lib/lapse';
 
 	const clamp = (num: number, min: number, max: number) => Math.min(Math.max(num, min), max);
 
@@ -28,12 +28,37 @@
 			: data.validationConstraints.timeSpent.min
 	);
 
+	let lapseUrl = $state('');
+	let lapseUrlValidFormat: boolean = $state(false);
+	let lapse: Lapse | null = $state(null);
+
 	function onchange() {
-		timeSpent = clamp(
-			timeSpent,
-			data.validationConstraints.timeSpent.min,
-			data.validationConstraints.timeSpent.currentMax
-		);
+		timeSpent = lapse?.ok
+			? lapse.timelapse.durationMins
+			: clamp(
+					timeSpent,
+					data.validationConstraints.timeSpent.min,
+					data.validationConstraints.timeSpent.currentMax
+				);
+	}
+
+	async function onchangeLapse() {
+		const lapseId = getIdFromLapseUrl(lapseUrl);
+
+		lapseUrlValidFormat = lapseId !== null;
+
+		if (lapseId !== null) {
+			lapse = await getLapse(lapseId);
+
+			if (lapse?.ok) {
+				timeSpent = lapse.timelapse.durationMins;
+			} else {
+				onchange();
+			}
+		} else {
+			lapse = null;
+			onchange();
+		}
 	}
 
 	let formPending = $state(false);
@@ -188,7 +213,9 @@
 		>
 			<div class="flex flex-col gap-2">
 				<label class="flex flex-col gap-1">
-					Time spent (minutes)
+					<p class="font-medium">
+						Time spent <span class="opacity-60">(minutes)</span>
+					</p>
 					<div class="flex gap-5">
 						<div>
 							<input
@@ -199,12 +226,16 @@
 								min={data.validationConstraints.timeSpent.min}
 								max={data.validationConstraints.timeSpent.currentMax}
 								{onchange}
-								class="themed-box w-25 ring-primary-900 placeholder:text-primary-900 active:ring-3"
+								disabled={lapse?.ok}
+								class:cursor-not-allowed={lapse?.ok}
+								class="themed-input w-25 placeholder:text-primary-900"
 							/>
 						</div>
 						<input
 							name="timeSpent"
 							type="range"
+							disabled={lapse?.ok}
+							class:cursor-not-allowed={lapse?.ok}
 							class="grow accent-primary-500"
 							bind:value={timeSpent}
 							step="1"
@@ -213,18 +244,60 @@
 							max={data.validationConstraints.timeSpent.max}
 						/>
 					</div>
-					<p class="text-sm opacity-50">
+					<p class="text-sm opacity-60">
 						The minimum journal time is {data.validationConstraints.timeSpent.min} minutes, the maximum
 						is
 						{data.validationConstraints.timeSpent.max ==
 						data.validationConstraints.timeSpent.currentMax
 							? ''
 							: 'currently'}
-						{data.validationConstraints.timeSpent.currentMax}
+						{data.validationConstraints.timeSpent.currentMax}, unless using Lapse.
 					</p>
 				</label>
+
+				<label class="flex flex-col">
+					<p class="font-medium">
+						Lapse URL <span class="opacity-60">(optional)</span>
+					</p>
+					<p class="mb-1 text-sm opacity-60">
+						Whilst optional, we strongly recommend using Lapse as it guarantees that your journal
+						time is accurate. The timelapse won't be shared with anyone except reviewers.
+					</p>
+					<input
+						name="lapseUrl"
+						type="text"
+						bind:value={lapseUrl}
+						oninput={onchangeLapse}
+						placeholder="https://lapse.hackclub.com/timelapse/0rph3uShe1di"
+						class="themed-input z-1"
+					/>
+					{#if lapseUrl.length > 0 && !lapseUrlValidFormat}
+						<p class="mt-2 text-sm text-primary-500">Invalid timelapse URL</p>
+					{:else if lapse && !lapse.ok}
+						<p class="mt-2 text-sm text-primary-500">{lapse.message}</p>
+					{:else if lapse?.ok}
+						<div class="themed-box mt-2 flex flex-row">
+							<div class="grow p-3">
+								<p class="text-xl font-bold">{lapse.timelapse.name}</p>
+								<p class="text-sm opacity-75">
+									<abbr title={`${lapse.timelapse.createdAt.toUTCString()}`}>
+										{relativeDate(lapse.timelapse.createdAt)}
+									</abbr>
+									∙ {Math.floor(lapse.timelapse.duration / 60)}min {lapse.timelapse.duration % 60}s
+								</p>
+								<p>{lapse.timelapse.description}</p>
+							</div>
+							<img
+								src={lapse.timelapse.thumbnailUrl}
+								alt="Timelapse thumbnail"
+								class="max-h-50 max-w-[60%]"
+							/>
+						</div>
+					{/if}
+				</label>
+
 				<label class="flex flex-col gap-1">
-					Description
+					<p class="font-medium">Description</p>
 					<CharCountedTextarea
 						name="description"
 						placeholder="Describe what you changed"
@@ -233,18 +306,17 @@
 						max={data.validationConstraints.description.max}
 					/>
 					{#if form?.invalid_description}
-						<p class="mt-1 text-sm">
+						<p class="mt-1 text-sm text-primary-500">
 							Invalid description, must be between {data.validationConstraints.description.min} and {data
 								.validationConstraints.description.max} characters
 						</p>
 					{/if}
 				</label>
+
 				<div class="mt-1 flex flex-row gap-2">
 					<label class="flex grow flex-col gap-1">
-						Image
-						<div
-							class="themed-box flex flex-col items-center p-1 outline-primary-900 focus-within:outline-1"
-						>
+						<p class="font-medium">Image</p>
+						<div class="themed-input flex flex-col items-center p-1 focus-within:ring-2">
 							<input
 								bind:this={imageInput}
 								type="file"
@@ -272,12 +344,12 @@
 						{/if}
 					</label>
 					<label class="flex grow flex-col gap-1">
-						3D model
+						<p class="font-medium">3D model</p>
 						<input
 							type="file"
 							name="model"
 							accept={ALLOWED_MODEL_EXTS.join(', ')}
-							class="themed-box p-1 outline-primary-900 focus:outline-1"
+							class="themed-input p-1"
 						/>
 						{#if form?.invalid_model_file}
 							<p class="mt-1 text-sm">
@@ -310,7 +382,7 @@
 			<div class="mt-1.5 flex">
 				<select
 					bind:value={sortDropdownValue}
-					class="themed-box fill-primary-50 text-sm ring-primary-900 placeholder:text-primary-900 active:ring-3"
+					class="themed-input fill-primary-50 text-sm ring-primary-900 placeholder:text-primary-900 active:ring-3"
 				>
 					<option value="descending">New to old</option>
 					<option value="ascending">Old to new</option>
@@ -328,7 +400,7 @@
 			/>
 		</div>
 	{:else}
-		{#each sortDevlogsAscending ? [...data.devlogs].reverse() : data.devlogs as devlog}
+		{#each sortDevlogsAscending ? [...data.devlogs].reverse() : data.devlogs as devlog (devlog.id)}
 			<Devlog
 				{devlog}
 				projectId={data.project.id}

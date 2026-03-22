@@ -79,7 +79,12 @@ export async function load({ locals, params }) {
 
 	return {
 		project: queriedProject,
-		devlogs,
+		devlogs: devlogs.map((devlog) => {
+			return {
+				...devlog,
+				lapseId: null
+			};
+		}),
 		reviews: await getReviewHistory(id)
 	};
 }

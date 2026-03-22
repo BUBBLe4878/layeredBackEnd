@@ -20,11 +20,11 @@ import {
 import { S3 } from '$lib/server/s3';
 import { PutObjectCommand } from '@aws-sdk/client-s3';
 import { env } from '$env/dynamic/private';
+import { getIdFromLapseUrl, getLapse, type Lapse } from '$lib/lapse';
 
 export async function load({ params, locals }) {
 	const id: number = parseInt(params.id);
 
-	// TODO: add this to the other endpoints
 	if (!id) {
 		throw error(404);
 	}
@@ -88,6 +88,7 @@ export async function load({ params, locals }) {
 				timeSpent: devlog.timeSpent,
 				image: devlog.image,
 				model: devlog.model,
+				lapseId: queriedProject.project.userId === locals.user?.id ? devlog.lapseId : null,
 				createdAt: devlog.createdAt
 			};
 		}),
@@ -133,6 +134,7 @@ export const actions = {
 		const data = await request.formData();
 		const description = data.get('description');
 		const timeSpent = data.get('timeSpent');
+		const lapseUrl = data.get('lapseUrl')?.toString();
 		const imageFile = data.get('image') as File;
 		const modelFile = data.get('model') as File;
 
@@ -147,11 +149,28 @@ export const actions = {
 			});
 		}
 
+		let lapseUrlValid = false;
+		let lapseId: string | null = null;
+		let lapse: Lapse | null = null;
+
+		if (lapseUrl && lapseUrl.length > 0) {
+			lapseId = getIdFromLapseUrl(lapseUrl);
+
+			if (lapseId) {
+				lapse = await getLapse(lapseId);
+
+				if (lapse?.ok) {
+					lapseUrlValid = true;
+				}
+			}
+		}
+
 		if (
-			!timeSpent ||
-			!parseInt(timeSpent.toString()) ||
-			parseInt(timeSpent.toString()) < DEVLOG_MIN_TIME ||
-			parseInt(timeSpent.toString()) > (await getMaxDevlogTime(id))
+			!lapseUrlValid &&
+			(!timeSpent ||
+				!parseInt(timeSpent.toString()) ||
+				parseInt(timeSpent.toString()) < DEVLOG_MIN_TIME ||
+				parseInt(timeSpent.toString()) > (await getMaxDevlogTime(id)))
 		) {
 			return fail(400, {
 				fields: { description, timeSpent },
@@ -226,7 +245,8 @@ export const actions = {
 			description: description.toString().trim(),
 			image: imagePath,
 			model: modelPath,
-			timeSpent: parseInt(timeSpent.toString()),
+			timeSpent: lapseUrlValid && lapse?.ok ? lapse.timelapse.durationMins : parseInt(timeSpent!.toString()),
+			lapseId: lapseUrlValid && lapse?.ok ? lapseId : null,
 			createdAt: new Date(Date.now()),
 			updatedAt: new Date(Date.now())
 		});
