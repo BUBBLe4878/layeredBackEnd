@@ -119,7 +119,7 @@
 			>
 		</label>
 		{#if form?.invalid_description}
-			<p class="text-sm">Invalid description, must be at most 1000 characters</p>
+			<p class="text-sm">Invalid description, must be at most 2000 characters</p>
 		{/if}
 	</div>
 	<button type="submit" class="button md primary mt-3 shadow-lg" disabled={formPending}>

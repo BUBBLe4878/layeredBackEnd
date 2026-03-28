@@ -75,7 +75,7 @@ export const actions = {
 			});
 		}
 
-		if (!(!description || description.toString().trim().length < 1000)) {
+		if (!(!description || description.toString().trim().length < 2000)) {
 			return fail(400, {
 				fields: { name, description },
 				invalid_description: true
