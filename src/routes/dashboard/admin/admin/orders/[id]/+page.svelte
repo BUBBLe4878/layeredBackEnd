@@ -60,6 +60,15 @@
 			</div>
 
 			<div>
+				<h3 class="text-lg font-bold">Email</h3>
+				{#if data.userDataError}
+					<p class="text-red-500">Failed to fetch user data, ask them to re-login</p>
+				{:else}
+					<p>{data.email}</p>
+				{/if}
+			</div>
+
+			<div>
 				<h3 class="text-lg font-bold">Shipping address</h3>
 				{#if data.userDataError}
 					<p class="text-red-500">Failed to fetch user data, ask them to re-login</p>
