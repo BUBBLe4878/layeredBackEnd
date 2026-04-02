@@ -115,7 +115,9 @@
 <h1 class="mt-5 mb-2 font-hero text-3xl font-medium">{data.project.name}</h1>
 
 {#if data.project.doubleDippingWith !== 'none'}
-	<DoubleDippingBanner ysws={data.project.doubleDippingWith} />
+	<div class="mb-2">
+		<DoubleDippingBanner ysws={data.project.doubleDippingWith} />
+	</div>
 {/if}
 
 <div class="flex flex-col gap-3 xl:flex-row">
