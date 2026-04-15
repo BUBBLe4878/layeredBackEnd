@@ -89,9 +89,28 @@ export async function load({ locals, params }) {
 		.where(and(eq(devlog.projectId, queriedProject.project.id), eq(devlog.deleted, false)))
 		.orderBy(asc(devlog.createdAt));
 
+	const [queriedUser] = await db
+		.select({
+			id: user.id,
+			idvToken: user.idvToken
+		})
+		.from(user).where(eq(user.id, queriedProject.user.id))
+		.limit(1);
+
+	let userData;
+	try {
+		const token = decrypt(queriedUser.idvToken!);
+		userData = await getUserData(token);
+	} catch {
+		userData = null;
+	}
+	const addresses = userData.addresses ?? [];
+	const address = addresses.find((address: { primary: boolean }) => address.primary);
+
 	return {
 		project: queriedProject,
 		devlogs,
+		addressFound: address ? true : false,
 		reviews: await getReviewHistory(id),
 		filamentUsed: await getLatestPrintFilament(id)
 	};

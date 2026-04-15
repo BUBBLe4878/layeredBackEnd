@@ -8,7 +8,7 @@
 	import Spinny3DPreview from '$lib/components/Spinny3DPreview.svelte';
 	import { Download } from '@lucide/svelte';
 	import ReviewHistory from '../../ReviewHistory.svelte';
-	import { calculatePayouts, minutesToClay } from '$lib/currency';
+	import { calculatePayouts } from '$lib/currency';
 	import DoubleDippingBanner from '$lib/components/DoubleDippingBanner.svelte';
 
 	let { data, form } = $props();
@@ -60,6 +60,7 @@
 							.project.timeSpent % 60}min
 					</p>
 					<p>Status: {projectStatuses[data.project.project.status]}</p>
+					<p>Address found: {data.addressFound ? 'true' : 'false'}</p>
 					<p>Filament spent printing: {data.filamentUsed}g</p>
 					<p>Submitted to Airtable: {data.project.project.submittedToAirtable ?? 'null (false)'}</p>
 					<div class="mt-1">
@@ -203,7 +204,7 @@
 
 			<h2 class="mt-2 text-2xl font-bold">Journal logs</h2>
 			<div class="mb-5 flex flex-col gap-5">
-				{#each data.devlogs as devlog}
+				{#each data.devlogs as devlog (devlog.id)}
 					<div class="flex flex-col gap-2">
 						<Devlog {devlog} projectId={devlog.projectId} showModifyButtons={false} />
 						<div class="themed-box flex flex-col gap-3 p-3">
