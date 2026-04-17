@@ -71,17 +71,17 @@
 	--background-color-quarternary: #94857d;
 	--font-color: #f3dcc6;
 
-	--color-primary-50: #fffaeb;
-	--color-primary-100: #fff1c6;
-	--color-primary-200: #fee389;
-	--color-primary-300: #fecb3e;
-	--color-primary-400: #feb921;
-	--color-primary-500: #f89708;
-	--color-primary-600: #db7004;
-	--color-primary-700: #b64e07;
-	--color-primary-800: #943c0c;
-	--color-primary-900: #79320e;
-	--color-primary-950: #461802;
+	--color-primary-50: #ecfdf6;
+	--color-primary-100: #d0fbe8;
+	--color-primary-200: #a6f4d5;
+	--color-primary-300: #6ce9c0;
+	--color-primary-400: #33d6a6;
+	--color-primary-500: #0dbc8e;
+	--color-primary-600: #039874;
+	--color-primary-700: #027a60;
+	--color-primary-800: #05604d;
+	--color-primary-900: #054f41;
+	--color-primary-950: #012d25;
 
 	/* --color-primary-50: #fff7ed;
 	--color-primary-100: #ffecd4;
@@ -282,7 +282,7 @@
 		}
 
 		&.orange {
-			@apply bg-orange-800 outline-orange-50 hover:bg-orange-700;
+			@apply bg-green-700 outline-green-50 hover:bg-green-600;
 		}
 
 		&.primary {
@@ -296,6 +296,45 @@
 
 	.link {
 		@apply underline hover:opacity-70 transition-opacity;
+	}
+
+	.pei-button {
+		color: #ffffff !important;
+		background-size: cover !important;
+		background-position: center !important;
+		background-repeat: no-repeat !important;
+	}
+
+	.pei-button * {
+		color: #ffffff !important;
+	}
+
+	.pei1 {
+		background-image: url('/img/pei1.png') !important;
+	}
+
+	.pei2 {
+		background-image: url('/img/pei1.png') !important;
+	}
+
+	.pei3 {
+		background-image: url('/img/pei1.png') !important;
+	}
+
+	.pei4 {
+		background-image: url('/img/pei1.png') !important;
+	}
+
+	.pei5 {
+		background-image: url('/img/pei1.png') !important;
+	}
+
+	.pei6 {
+		background-image: url('/img/pei1.png') !important;
+	}
+
+	.pei7 {
+		background-image: url('/img/pei2F.png') !important;
 	}
 
 	.themed-input-light {
@@ -350,19 +389,19 @@
 
 @layer utilities {
 	.themed-box {
-		@apply rounded-lg border-3 border-dashed border-primary-900 bg-primary-950;
+		@apply rounded-lg border-3 border-[#ffffff] bg-[#3da848];
 	}
 
 	.themed-box-prominent {
-		@apply rounded-lg border-3 border-dashed border-primary-700 bg-primary-950;
+		@apply rounded-lg border-3 border-[#ffffff] bg-[#3da848];
 	}
 
 	.themed-box-solid {
-		@apply rounded-lg border-3 border-primary-900 bg-primary-950;
+		@apply rounded-lg border-3 border-[#ffffff] bg-[#3da848];
 	}
 
 	.themed-box-solid-prominent {
-		@apply rounded-lg border-3 border-primary-700 bg-primary-950;
+		@apply rounded-lg border-3 border-[#ffffff] bg-[#3da848];
 	}
 
 	.center {
