@@ -6,5 +6,5 @@
 
 <svelte:head>
 	<link rel="icon" href={favicon} />
-	<title>{title ? `${title} | Construct` : 'Construct'}</title>
+	<title>{title ? `${title} | Layered` : 'Layered'}</title>
 </svelte:head>

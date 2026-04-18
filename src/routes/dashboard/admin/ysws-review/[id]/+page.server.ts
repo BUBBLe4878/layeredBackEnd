@@ -268,7 +268,7 @@ export const actions = {
 
 			const justificationAppend = `Project has ${queriedProject.devlogCount} ${queriedProject.devlogCount == 1 ? 'journal' : 'journals'} over ${Math.floor(
 				queriedProject.timeSpent / 60
-			)}h ${queriedProject.timeSpent % 60}min, each one with a 3d model file to show progress.\nAll journals can be found here: https://construct.hackclub.com/dashboard/projects/${queriedProject.project.id}`;
+			)}h ${queriedProject.timeSpent % 60}min, each one with a 3d model file to show progress.\nAll journals can be found here: https://layered.hackclub.com/dashboard/projects/${queriedProject.project.id}`;
 
 			await airtableBase('tblBQ2aKCQanXJSaa').create({
 				fld9BIrlDRnjVL6Ui: repoUrl ?? '',
@@ -396,7 +396,7 @@ export const actions = {
 
 				await sendSlackDM(
 					queriedProject.user.slackId,
-					`Your project <https://construct.hackclub.com/dashboard/projects/${queriedProject.project.id}|${queriedProject.project.name}> has been ${statusMessage}${feedbackText}`
+					`Your project <https://layered.hackclub.com/dashboard/projects/${queriedProject.project.id}|${queriedProject.project.name}> has been ${statusMessage}${feedbackText}`
 				);
 			}
 

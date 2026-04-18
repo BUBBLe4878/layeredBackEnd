@@ -19,7 +19,7 @@
 <Head title="Dashboard" />
 
 <h1 class="mt-5 mb-1 font-hero text-3xl font-medium">Dashboard</h1>
-<p class="mb-2">Welcome to Construct!</p>
+<p class="mb-2">Welcome to Layered!</p>
 <div
 	class="flex flex-col gap-0.5 p-3 outline-primary-500"
 	class:animate-outline-ping={data.shipCount == 0}

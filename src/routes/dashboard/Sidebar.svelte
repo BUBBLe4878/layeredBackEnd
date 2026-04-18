@@ -13,7 +13,6 @@
 		Users
 	} from '@lucide/svelte';
 	import { page } from '$app/state';
-	import logo from '$lib/assets/logo.png';
 
 	let { user } = $props();
 
@@ -26,7 +25,11 @@
 <div class="themed-box m-5 flex w-60 flex-none flex-col gap-2 rounded-xl p-3 shadow-lg/20 2xl:w-70">
 	<div class="mb-0">
 		<a href="/">
-			<img src={logo} alt="logo" />
+			<div
+				class="rounded-xl border-2 border-dashed border-primary-300 bg-primary-900/60 px-3 py-5 text-center text-sm font-bold uppercase tracking-widest text-primary-100"
+			>
+				Layered Logo Here
+			</div>
 		</a>
 	</div>
 	<SidebarButton icon={House} href="/dashboard" exact>Home</SidebarButton>

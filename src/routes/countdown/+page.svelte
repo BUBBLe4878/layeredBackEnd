@@ -44,20 +44,20 @@
 		<h2 class="mb-6 font-hero text-xl text-primary-300 md:text-2xl">The countdown is over!</h2>
 		<div class="themed-box max-w-2xl p-8 text-center">
 			<p class="mb-4 text-lg text-primary-100">
-				Please wait patiently for Construct to start. It will be announced later today in
+				Please wait patiently for Layered to start. It will be announced later today in
 				<a
 					href="https://hackclub.enterprise.slack.com/archives/C0A02DFLVNW"
 					target="_blank"
 					rel="noopener noreferrer"
 					class="font-bold text-primary-300 underline hover:text-primary-400"
 				>
-					#construct-announcements
+					#layered-announcements
 				</a>
 			</p>
 		</div>
 		<a href="/" class="mt-10 underline">Go back home</a>
 	{:else}
-		<h2 class="mb-6 font-hero text-xl text-primary-300 md:text-2xl">Countdown to Construct!</h2>
+		<h2 class="mb-6 font-hero text-xl text-primary-300 md:text-2xl">Countdown to Layered!</h2>
 		<div class="grid grid-cols-2 gap-4 text-center font-hero text-primary-50 md:grid-cols-4">
 			<div class="themed-box flex min-w-[120px] flex-col items-center justify-center p-4">
 				<span class="mb-2 text-4xl md:text-5xl">{timeLeft.days}</span>

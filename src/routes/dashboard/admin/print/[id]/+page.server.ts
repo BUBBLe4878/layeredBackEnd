@@ -262,7 +262,7 @@ export const actions = {
 
 			await sendSlackDM(
 				queriedProject.user.slackId,
-				`Your project <https://construct.hackclub.com/dashboard/projects/${queriedProject.project.id}|${queriedProject.project.name}> has been printed! :tada:${feedbackText}`
+				`Your project <https://layered.hackclub.com/dashboard/projects/${queriedProject.project.id}|${queriedProject.project.name}> has been printed! :tada:${feedbackText}`
 			);
 		}
 

@@ -46,7 +46,7 @@
 	<p class="mt-1">
 		Want to get something else added here? Ask in <a
 			href="https://hackclub.slack.com/archives/C09QSTUV88Y"
-			class="underline" target="_blank">#construct-help</a
+			class="underline" target="_blank">#layered-help</a
 		>!
 	</p>
 </div>

@@ -210,7 +210,7 @@
 		</select>
 		<p class="mt-0.5 text-sm opacity-50">
 			Are you submitting this project to any other YSWSes? You can only double dip with YSWSes in
-			this list. Select "None" if you're only shipping this to Construct.
+			this list. Select "None" if you're only shipping this to Layered.
 		</p>
 	</label>
 
