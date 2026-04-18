@@ -9,7 +9,7 @@ export default defineConfig({
 			adapter: 'node',
 			sourceMapsUploadOptions: {
 				org: 'hack-club',
-				project: 'layered',
+				project: 'construct',
 				authToken: process.env.SENTRY_AUTH_TOKEN
 			}
 		}),

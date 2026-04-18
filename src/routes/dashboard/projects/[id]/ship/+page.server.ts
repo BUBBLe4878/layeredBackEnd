@@ -337,7 +337,7 @@ export const actions = {
 
 		await sendSlackDM(
 			locals.user.slackId,
-			`Hii :hyper-dino-wave:\n Your project <https://layered.hackclub.com/dashboard/projects/${queriedProject.id}|${queriedProject.name}> has been shipped and is now under review, we'll take a look and get back to you soon! :woooo:`
+			`Hii :hyper-dino-wave:\n Your project <https://construct.hackclub.com/dashboard/projects/${queriedProject.id}|${queriedProject.name}> has been shipped and is now under review, we'll take a look and get back to you soon! :woooo:`
 		);
 
 		return redirect(303, '/dashboard/projects');
