@@ -1,0 +1,410 @@
+@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Sora:wght@100..800&display=swap');
+
+@import 'tailwindcss';
+@plugin '@tailwindcss/forms';
+@plugin '@tailwindcss/typography';
+
+@font-face {
+	font-family: 'Phantom Sans';
+	src:
+		url('https://assets.hackclub.com/fonts/Phantom_Sans_0.7/Regular.woff') format('woff'),
+		url('https://assets.hackclub.com/fonts/Phantom_Sans_0.7/Regular.woff2') format('woff2');
+	font-weight: normal;
+	font-style: normal;
+	font-display: swap;
+}
+@font-face {
+	font-family: 'Phantom Sans';
+	src:
+		url('https://assets.hackclub.com/fonts/Phantom_Sans_0.7/Italic.woff') format('woff'),
+		url('https://assets.hackclub.com/fonts/Phantom_Sans_0.7/Italic.woff2') format('woff2');
+	font-weight: normal;
+	font-style: italic;
+	font-display: swap;
+}
+@font-face {
+	font-family: 'Phantom Sans';
+	src:
+		url('https://assets.hackclub.com/fonts/Phantom_Sans_0.7/Bold.woff') format('woff'),
+		url('https://assets.hackclub.com/fonts/Phantom_Sans_0.7/Bold.woff2') format('woff2');
+	font-weight: bold;
+	font-style: normal;
+	font-display: swap;
+}
+@font-face {
+	font-family: 'Papyrus';
+	src: url('https://db.onlinewebfonts.com/t/107eaa009712278feeb98175016a8a81.eot');
+	src:
+		url('https://db.onlinewebfonts.com/t/107eaa009712278feeb98175016a8a81.eot?#iefix')
+			format('embedded-opentype'),
+		url('https://db.onlinewebfonts.com/t/107eaa009712278feeb98175016a8a81.woff2') format('woff2'),
+		url('https://db.onlinewebfonts.com/t/107eaa009712278feeb98175016a8a81.woff') format('woff'),
+		url('https://db.onlinewebfonts.com/t/107eaa009712278feeb98175016a8a81.ttf') format('truetype'),
+		url('https://db.onlinewebfonts.com/t/107eaa009712278feeb98175016a8a81.svg#Papyrus')
+			format('svg');
+}
+@font-face {
+	font-family: 'Comic Sans MS';
+	src: url('https://db.onlinewebfonts.com/t/7cc6719bd5f0310be3150ba33418e72e.eot');
+	src:
+		url('https://db.onlinewebfonts.com/t/7cc6719bd5f0310be3150ba33418e72e.eot?#iefix')
+			format('embedded-opentype'),
+		url('https://db.onlinewebfonts.com/t/7cc6719bd5f0310be3150ba33418e72e.woff2') format('woff2'),
+		url('https://db.onlinewebfonts.com/t/7cc6719bd5f0310be3150ba33418e72e.woff') format('woff'),
+		url('https://db.onlinewebfonts.com/t/7cc6719bd5f0310be3150ba33418e72e.ttf') format('truetype'),
+		url('https://db.onlinewebfonts.com/t/7cc6719bd5f0310be3150ba33418e72e.svg#Comic Sans MS')
+			format('svg');
+}
+
+@theme {
+	--font-hero: 
+		/* 'Comic Sans MS', */ 'Press Start 2P', var(--font-sans);
+	--font-hc: 'Phantom Sans', var(--font-sans);
+	--font-sans:
+		/* 'Papyrus', */
+		'Sora', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
+		'Segoe UI Symbol', 'Noto Color Emoji';
+
+	--background-color: #22211f;
+	--background-color-secondary: #2e2a2770;
+	--background-color-tertiary: #342f2cad;
+	--background-color-quarternary: #94857d;
+	--font-color: #f3dcc6;
+
+	--color-primary-50: #ecfdf6;
+	--color-primary-100: #d0fbe8;
+	--color-primary-200: #a6f4d5;
+	--color-primary-300: #6ce9c0;
+	--color-primary-400: #33d6a6;
+	--color-primary-500: #0dbc8e;
+	--color-primary-600: #039874;
+	--color-primary-700: #027a60;
+	--color-primary-800: #05604d;
+	--color-primary-900: #054f41;
+	--color-primary-950: #012d25;
+
+	/* --color-primary-50: #fff7ed;
+	--color-primary-100: #ffecd4;
+	--color-primary-200: #ffd5a8;
+	--color-primary-300: #ffb671;
+	--color-primary-400: #ff8c37;
+	--color-primary-500: #fe6c11;
+	--color-primary-600: #ef5107;
+	--color-primary-700: #c63a08;
+	--color-primary-800: #9d2f0f;
+	--color-primary-900: #7e2910;
+	--color-primary-950: #441106; */
+
+	--color-hc-red-50: #fef2f2;
+	--color-hc-red-100: #fee5e6;
+	--color-hc-red-200: #fccfd3;
+	--color-hc-red-300: #faa7ae;
+	--color-hc-red-400: #f67685;
+	--color-hc-red-500: #ec3750;
+	--color-hc-red-600: #da2446;
+	--color-hc-red-700: #b8183a;
+	--color-hc-red-800: #9a1737;
+	--color-hc-red-900: #841735;
+	--color-hc-red-950: #490818;
+
+	--color-hc-orange-50: #fff7ed;
+	--color-hc-orange-100: #ffecd4;
+	--color-hc-orange-200: #ffd5a8;
+	--color-hc-orange-300: #ffb671;
+	--color-hc-orange-400: #ff8c37;
+	--color-hc-orange-500: #fe6c11;
+	--color-hc-orange-600: #ef5107;
+	--color-hc-orange-700: #c63a08;
+	--color-hc-orange-800: #9d2f0f;
+	--color-hc-orange-900: #7e2910;
+	--color-hc-orange-950: #441106;
+
+	--color-hc-yellow-50: #fdfde9;
+	--color-hc-yellow-100: #fdfbc4;
+	--color-hc-yellow-200: #fbf38d;
+	--color-hc-yellow-300: #f9e54b;
+	--color-hc-yellow-400: #f5d31a;
+	--color-hc-yellow-500: #f1c40f;
+	--color-hc-yellow-600: #c59009;
+	--color-hc-yellow-700: #9d670b;
+	--color-hc-yellow-800: #825211;
+	--color-hc-yellow-900: #6f4314;
+	--color-hc-yellow-950: #412307;
+
+	--color-hc-green-50: #ecfdf6;
+	--color-hc-green-100: #d0fbe8;
+	--color-hc-green-200: #a6f4d5;
+	--color-hc-green-300: #6ce9c0;
+	--color-hc-green-400: #33d6a6;
+	--color-hc-green-500: #0dbc8e;
+	--color-hc-green-600: #039874;
+	--color-hc-green-700: #027a60;
+	--color-hc-green-800: #05604d;
+	--color-hc-green-900: #054f41;
+	--color-hc-green-950: #012d25;
+
+	--color-hc-cyan-50: #effbfc;
+	--color-hc-cyan-100: #d6f1f7;
+	--color-hc-cyan-200: #b1e2f0;
+	--color-hc-cyan-300: #5bc0de;
+	--color-hc-cyan-400: #3faed1;
+	--color-hc-cyan-500: #2391b7;
+	--color-hc-cyan-600: #20749a;
+	--color-hc-cyan-700: #205f7e;
+	--color-hc-cyan-800: #224f68;
+	--color-hc-cyan-900: #214358;
+	--color-hc-cyan-950: #102a3c;
+
+	--color-hc-blue-50: #f2f7fd;
+	--color-hc-blue-100: #e3eefb;
+	--color-hc-blue-200: #c1dcf6;
+	--color-hc-blue-300: #8bc0ee;
+	--color-hc-blue-400: #4d9fe3;
+	--color-hc-blue-500: #338eda;
+	--color-hc-blue-600: #1867b1;
+	--color-hc-blue-700: #145290;
+	--color-hc-blue-800: #154777;
+	--color-hc-blue-900: #173c63;
+	--color-hc-blue-950: #0f2742;
+
+	--color-hc-purple-50: #fbf6fe;
+	--color-hc-purple-100: #f6eafd;
+	--color-hc-purple-200: #efd9fb;
+	--color-hc-purple-300: #e3bbf7;
+	--color-hc-purple-400: #d28ff1;
+	--color-hc-purple-500: #c064e8;
+	--color-hc-purple-600: #a633d6;
+	--color-hc-purple-700: #9632be;
+	--color-hc-purple-800: #7e2d9c;
+	--color-hc-purple-900: #67267d;
+	--color-hc-purple-950: #480f5c;
+
+	--color-hc-gray-50: #f5f7f8;
+	--color-hc-gray-100: #ecf1f3;
+	--color-hc-gray-200: #dde4e8;
+	--color-hc-gray-300: #c7d3da;
+	--color-hc-gray-400: #b0bec9;
+	--color-hc-gray-500: #9baab9;
+	--color-hc-gray-600: #8492a6;
+	--color-hc-gray-700: #717d91;
+	--color-hc-gray-800: #5d6776;
+	--color-hc-gray-900: #4f5760;
+	--color-hc-gray-950: #2e3238;
+
+	--animate-outline-ping: outline-ping 1.4s cubic-bezier(0, 0, 0.2, 1) infinite;
+	@keyframes outline-ping {
+		0% {
+			outline-width: 0px;
+		}
+		70% {
+			outline-width: 10px;
+			outline-color: transparent;
+		}
+		100% {
+			outline-width: 0px;
+			outline-color: transparent;
+		}
+	}
+}
+
+@layer base {
+	body {
+		background-color: var(--background-color);
+		color: var(--font-color);
+		/* background-image:  linear-gradient(var(--background-color-secondary) 2px, transparent 2px), linear-gradient(90deg, var(--background-color-secondary) 2px, transparent 2px), linear-gradient(var(--background-color-secondary) 1px, transparent 1px), linear-gradient(90deg, var(--background-color-secondary) 1px, var(--background-color) 1px);
+        background-size: 50px 50px, 50px 50px, 5px 5px, 5px 5px;
+        background-position: -2px -2px, -2px -2px, -1px -1px, -1px -1px; */
+		background:
+			linear-gradient(-90deg, var(--background-color-secondary) 1px, transparent 1px),
+			linear-gradient(var(--background-color-secondary) 1px, transparent 1px),
+			linear-gradient(-90deg, var(--background-color-tertiary) 1px, transparent 1px),
+			linear-gradient(var(--background-color-tertiary) 1px, transparent 1px),
+			linear-gradient(
+				transparent 3px,
+				var(--background-color) 3px,
+				var(--background-color) 78px,
+				transparent 78px
+			),
+			linear-gradient(-90deg, var(--background-color-quarternary) 1px, transparent 1px),
+			linear-gradient(
+				-90deg,
+				transparent 3px,
+				var(--background-color) 3px,
+				var(--background-color) 78px,
+				transparent 78px
+			),
+			linear-gradient(var(--background-color-quarternary) 1px, transparent 1px),
+			var(--background-color);
+		background-size:
+			4px 4px,
+			4px 4px,
+			80px 80px,
+			80px 80px,
+			80px 80px,
+			80px 80px,
+			80px 80px,
+			80px 80px;
+		background-attachment: fixed;
+	}
+}
+
+@layer components {
+	.button {
+		@apply flex cursor-pointer flex-row justify-center transition-colors;
+
+		&.sm {
+			@apply gap-1 rounded-sm p-2 text-sm hover:outline-2 focus:outline-2;
+
+			& .lucide-icon {
+				@apply size-[20px];
+			}
+		}
+
+		&.xs {
+			@apply gap-1 rounded-sm p-1.5 text-xs hover:outline-2 focus:outline-2;
+
+			& .lucide-icon {
+				@apply size-[16px];
+			}
+		}
+
+		&.md {
+			@apply gap-1 rounded-lg p-2 hover:outline-3 focus:outline-3;
+		}
+
+		&:disabled,
+		&.disabled {
+			@apply cursor-not-allowed opacity-70 hover:outline-0;
+		}
+
+		&.red {
+			@apply bg-red-800 outline-red-50 hover:bg-red-700;
+		}
+
+		&.orange {
+			@apply bg-green-700 outline-green-50 hover:bg-green-600;
+		}
+
+		&.primary {
+			@apply bg-primary-800 outline-primary-50 hover:bg-primary-700;
+		}
+
+		&.dark-red {
+			@apply bg-red-900 outline-red-50 hover:bg-red-800;
+		}
+	}
+
+	.link {
+		@apply underline hover:opacity-70 transition-opacity;
+	}
+
+	.pei-button {
+		color: #ffffff !important;
+		background-size: cover !important;
+		background-position: center !important;
+		background-repeat: no-repeat !important;
+	}
+
+	.pei-button * {
+		color: #ffffff !important;
+	}
+
+	.pei1 {
+		background-image: url('/img/pei1.png') !important;
+	}
+
+	.pei2 {
+		background-image: url('/img/pei1.png') !important;
+	}
+
+	.pei3 {
+		background-image: url('/img/pei1.png') !important;
+	}
+
+	.pei4 {
+		background-image: url('/img/pei1.png') !important;
+	}
+
+	.pei5 {
+		background-image: url('/img/pei1.png') !important;
+	}
+
+	.pei6 {
+		background-image: url('/img/pei1.png') !important;
+	}
+
+	.pei7 {
+		background-image: url('/img/pei2F.png') !important;
+	}
+
+	.themed-input-light {
+		@apply border-3 border-primary-700 bg-primary-900 fill-primary-50 p-2 text-sm ring-primary-900 outline-transparent placeholder:text-primary-700 active:ring-3;
+	}
+
+	.themed-input {
+		@apply rounded-lg border-3 border-primary-900 bg-primary-950 ring-primary-700 outline-transparent transition-shadow placeholder:text-primary-800 focus:ring-2;
+	}
+
+	.themed-input-on-box {
+		@apply rounded-lg border-3 border-primary-800 bg-primary-900 ring-primary-700 outline-transparent transition-shadow placeholder:text-primary-700 focus:ring-2;
+	}
+
+	.checkbox {
+		@apply h-4 w-4 rounded-sm border-2 border-primary-600 bg-primary-900 ring-0;
+	}
+
+	.list-link {
+		@apply text-primary-400 underline transition-all hover:text-primary-500/75;
+	}
+
+	.enclosure-bg {
+		background-color: #391F12;
+		position: relative;
+		overflow: hidden;
+		z-index: 1;
+		@apply border-3 border-[#F48D2C];
+	}
+
+	.enclosure-bg::before {
+		content: "";
+		position: absolute;
+
+		top: 50%;
+		left: 50%;
+
+		width: 150%;
+		height: 6000%;
+
+		transform: translate(-50%, -50%) rotate(30deg);
+
+		background-image: url("https://cdn.hackclub.com/019d4983-aa2c-7c07-ad9e-07ec8b3f9bb9/image.png");
+		opacity: 15%;
+		background-repeat: repeat;
+		background-size: 35px 35px;
+
+		z-index: 0;
+		pointer-events: none;
+	}
+}
+
+@layer utilities {
+	.themed-box {
+		@apply rounded-lg border-3 border-[#ffffff] bg-[#3da848];
+	}
+
+	.themed-box-prominent {
+		@apply rounded-lg border-3 border-[#ffffff] bg-[#3da848];
+	}
+
+	.themed-box-solid {
+		@apply rounded-lg border-3 border-[#ffffff] bg-[#3da848];
+	}
+
+	.themed-box-solid-prominent {
+		@apply rounded-lg border-3 border-[#ffffff] bg-[#3da848];
+	}
+
+	.center {
+		@apply absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 transform;
+	}
+}
