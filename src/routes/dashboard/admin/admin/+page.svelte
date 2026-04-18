@@ -1,0 +1,87 @@
+<script lang="ts">
+	import Head from '$lib/components/Head.svelte';
+	import { ChartLine, Mail, Package2, PackageCheck, Printer, ScrollText, Store, Users } from '@lucide/svelte';
+
+	let { data } = $props();
+</script>
+
+<Head title="Admin" />
+
+<div class="flex h-full flex-col">
+	<h1 class="mt-5 mb-3 font-hero text-3xl font-medium">Admin</h1>
+
+	<div class="grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5">
+		<a
+			class="themed-box flex flex-col items-center justify-center gap-2 p-3 shadow-xl transition-transform hover:scale-105"
+			href="admin/users"
+		>
+			<div>
+				<Users size={40} />
+			</div>
+			<p class="text-2xl font-bold">Users</p>
+		</a>
+		<a
+			class="themed-box flex flex-col items-center justify-center gap-2 p-3 shadow-xl transition-transform hover:scale-105"
+			href="admin/stats"
+		>
+			<div>
+				<ChartLine size={40} />
+			</div>
+			<p class="text-2xl font-bold">Stats</p>
+		</a>
+		<a
+			class="themed-box flex flex-col items-center justify-center gap-2 p-3 shadow-xl transition-transform hover:scale-105"
+			href="admin/market"
+		>
+			<div>
+				<Store size={40} />
+			</div>
+			<p class="text-2xl font-bold">Market</p>
+		</a>
+		<a
+			class="themed-box flex flex-col items-center justify-center gap-2 p-3 shadow-xl transition-transform hover:scale-105"
+			href="admin/orders"
+		>
+			<div>
+				<Package2 size={40} />
+			</div>
+			<p class="text-2xl font-bold">Item orders</p>
+		</a>
+		<a
+			class="themed-box flex flex-col items-center justify-center gap-2 p-3 shadow-xl transition-transform hover:scale-105"
+			href="admin/stickers"
+		>
+			<div>
+				<Mail size={40} />
+			</div>
+			<p class="text-2xl font-bold">Stickers/keyrings</p>
+		</a>
+		<a
+			class="themed-box flex flex-col items-center justify-center gap-2 p-3 shadow-xl transition-transform hover:scale-105"
+			href="admin/impersonate-logs"
+		>
+			<div>
+				<ScrollText size={40} />
+			</div>
+			<p class="text-2xl font-bold">Impersonate logs</p>
+		</a>
+		<a
+			class="themed-box flex flex-col items-center justify-center gap-2 p-3 shadow-xl transition-transform hover:scale-105"
+			href="admin/printer-purchases"
+		>
+			<div>
+				<Printer size={40} />
+			</div>
+			<p class="text-2xl font-bold">Printer purchases</p>
+		</a>
+		<a
+			class="themed-box flex flex-col items-center justify-center gap-2 p-3 shadow-xl transition-transform hover:scale-105"
+			href="admin/printer-fulfilment"
+		>
+			<div>
+				<PackageCheck size={40} />
+			</div>
+			<p class="text-2xl font-bold">Printer fulfilment</p>
+		</a>
+	</div>
+</div>

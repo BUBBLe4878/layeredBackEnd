@@ -185,7 +185,7 @@ export const actions = {
 
 			await sendSlackDM(
 				projectUser.slackId,
-				`Your project <https://construct.hackclub.com/dashboard/projects/${queriedProject.id}|${queriedProject.name}> has been ${statusMessage}${feedbackText}`
+				`Your project <https://layered.hackclub.com/dashboard/projects/${queriedProject.id}|${queriedProject.name}> has been ${statusMessage}${feedbackText}`
 			);
 		}
 
