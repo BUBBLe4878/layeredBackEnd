@@ -34,19 +34,23 @@ export const GET: RequestHandler = async () => {
           let profileImage = null;
           let slackUsername = member.slackId; // fallback to ID
           
-          if (slackData.user?.profile) {
-            profileImage = slackData.user.profile.image_512 ||
-                          slackData.user.profile.image_256 ||
-                          slackData.user.profile.image_192 ||
-                          slackData.user.profile.image_72;
+          if (slackData.user) {
+            profileImage = slackData.user.profile?.image_512 ||
+                          slackData.user.profile?.image_256 ||
+                          slackData.user.profile?.image_192 ||
+                          slackData.user.profile?.image_72;
             
-            // Get Slack display name (username)
-            slackUsername = slackData.user.name || slackData.user.real_name || member.slackId;
+            // Get Slack display name - try these in order
+            slackUsername = 
+              slackData.user.profile?.display_name || // Slack display name
+              slackData.user.real_name ||              // Real name
+              slackData.user.name ||                   // Username
+              member.slackId;                          // Fallback to ID
           }
 
           return {
             id: member.id,
-            name: slackUsername, // NOW returns Slack username instead of real name
+            name: slackUsername,
             slackId: member.slackId,
             profileImage: profileImage,
             signedUpAt: member.createdAt,
@@ -55,7 +59,7 @@ export const GET: RequestHandler = async () => {
           console.error(`Error fetching Slack profile for ${member.slackId}:`, err);
           return {
             id: member.id,
-            name: member.slackId, // fallback to Slack ID
+            name: member.slackId,
             slackId: member.slackId,
             profileImage: null,
             signedUpAt: member.createdAt,
@@ -64,7 +68,7 @@ export const GET: RequestHandler = async () => {
       })
     );
 
-    console.log('Found', slackMembers.length, 'members');
+    console.log('✅ Found', slackMembers.length, 'members');
 
     return json({
       success: true,
@@ -72,7 +76,7 @@ export const GET: RequestHandler = async () => {
       members: membersWithSlackProfiles,
     });
   } catch (error) {
-    console.error('Error fetching members:', error);
+    console.error('❌ Error fetching members:', error);
     return json(
       { success: false, error: error instanceof Error ? error.message : 'Unknown error' },
       { status: 500 }
