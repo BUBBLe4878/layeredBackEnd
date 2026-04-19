@@ -5,15 +5,17 @@ import type { RequestHandler } from './$types';
 
 export const GET: RequestHandler = async () => {
   try {
+    // Fetch all signed-up users
     const allUsers = await db.select({
       id: user.id,
       name: user.name,
       slackId: user.slackId,
-      profileImage: user.profileImage,
+      profilePicture: user.profilePicture, // FIX: was profileImage
       createdAt: user.createdAt,
     }).from(user);
 
-    const slackMembers = allUsers.filter(u => u.slackId !== null);
+    // Filter to only users who have a valid slackId
+    const slackMembers = allUsers.filter(u => u.slackId && u.slackId.trim());
 
     return json({
       success: true,
@@ -22,7 +24,7 @@ export const GET: RequestHandler = async () => {
         id: u.id,
         name: u.name || 'Unknown',
         slackId: u.slackId,
-        profileImage: u.profileImage || null,
+        profileImage: u.profilePicture, // Return as profileImage for bot
         signedUpAt: u.createdAt,
       })),
     });
