@@ -3,19 +3,23 @@ import { db } from '$lib/server/db';
 import { user } from '$lib/server/db/schema';
 import type { RequestHandler } from './$types';
 
-export const GET: RequestHandler = async () => {
+export const GET: RequestHandler = async ({ request }) => {
   try {
-    // Fetch all signed-up users
+    console.log('🔍 Slack members endpoint hit');
+    console.log('Origin:', request.headers.get('origin'));
+    console.log('User-Agent:', request.headers.get('user-agent'));
+    
     const allUsers = await db.select({
       id: user.id,
       name: user.name,
       slackId: user.slackId,
-      profilePicture: user.profilePicture, // FIX: was profileImage
+      profilePicture: user.profilePicture,
       createdAt: user.createdAt,
     }).from(user);
 
-    // Filter to only users who have a valid slackId
     const slackMembers = allUsers.filter(u => u.slackId && u.slackId.trim());
+
+    console.log('Found', slackMembers.length, 'members');
 
     return json({
       success: true,
@@ -24,7 +28,7 @@ export const GET: RequestHandler = async () => {
         id: u.id,
         name: u.name || 'Unknown',
         slackId: u.slackId,
-        profileImage: u.profilePicture, // Return as profileImage for bot
+        profileImage: u.profilePicture,
         signedUpAt: u.createdAt,
       })),
     });
