@@ -5,11 +5,10 @@ import type { RequestHandler } from './$types';
 
 export const GET: RequestHandler = async () => {
   try {
-    console.log('Slack members endpoint hit');
+    console.log('🔍 Slack members endpoint hit');
     
     const allUsers = await db.select({
       id: user.id,
-      name: user.name,
       slackId: user.slackId,
       createdAt: user.createdAt,
     }).from(user);
@@ -33,26 +32,30 @@ export const GET: RequestHandler = async () => {
 
           // Get the best available profile picture
           let profileImage = null;
+          let slackUsername = member.slackId; // fallback to ID
+          
           if (slackData.user?.profile) {
             profileImage = slackData.user.profile.image_512 ||
                           slackData.user.profile.image_256 ||
                           slackData.user.profile.image_192 ||
                           slackData.user.profile.image_72;
+            
+            // Get Slack display name (username)
+            slackUsername = slackData.user.name || slackData.user.real_name || member.slackId;
           }
 
           return {
             id: member.id,
-            name: member.name || 'Unknown',
+            name: slackUsername, // NOW returns Slack username instead of real name
             slackId: member.slackId,
-            profileImage: profileImage, // Real Slack profile pic
+            profileImage: profileImage,
             signedUpAt: member.createdAt,
           };
         } catch (err) {
           console.error(`Error fetching Slack profile for ${member.slackId}:`, err);
-          // Fallback to no image if Slack API fails
           return {
             id: member.id,
-            name: member.name || 'Unknown',
+            name: member.slackId, // fallback to Slack ID
             slackId: member.slackId,
             profileImage: null,
             signedUpAt: member.createdAt,
