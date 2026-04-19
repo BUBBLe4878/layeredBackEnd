@@ -10,70 +10,25 @@ export const GET: RequestHandler = async () => {
     const allUsers = await db.select({
       id: user.id,
       slackId: user.slackId,
+      name: user.name,
+      profilePicture: user.profilePicture,
       createdAt: user.createdAt,
     }).from(user);
 
     const slackMembers = allUsers.filter(u => u.slackId && u.slackId.trim());
-
-    // Fetch Slack profile info for each user to get their real profile picture
-    const membersWithSlackProfiles = await Promise.all(
-      slackMembers.map(async (member) => {
-        try {
-          const slackResponse = await fetch('https://slack.com/api/users.info', {
-            method: 'POST',
-            headers: {
-              'Authorization': `Bearer ${process.env.SLACK_BOT_TOKEN}`,
-              'Content-Type': 'application/x-www-form-urlencoded',
-            },
-            body: `user=${member.slackId}`,
-          });
-
-          const slackData = await slackResponse.json();
-
-          // Get the best available profile picture
-          let profileImage = null;
-          let slackUsername = member.slackId; // fallback to ID
-          
-          if (slackData.user) {
-            profileImage = slackData.user.profile?.image_512 ||
-                          slackData.user.profile?.image_256 ||
-                          slackData.user.profile?.image_192 ||
-                          slackData.user.profile?.image_72;
-            
-            // Get Slack display name - try these in order
-            slackUsername = 
-              slackData.user.profile?.display_name || // Slack display name
-              slackData.user.real_name ||              // Real name
-              slackData.user.name ||                   // Username
-              member.slackId;                          // Fallback to ID
-          }
-
-          return {
-            id: member.id,
-            name: slackUsername,
-            slackId: member.slackId,
-            profileImage: profileImage,
-            signedUpAt: member.createdAt,
-          };
-        } catch (err) {
-          console.error(`Error fetching Slack profile for ${member.slackId}:`, err);
-          return {
-            id: member.id,
-            name: member.slackId,
-            slackId: member.slackId,
-            profileImage: null,
-            signedUpAt: member.createdAt,
-          };
-        }
-      })
-    );
 
     console.log('✅ Found', slackMembers.length, 'members');
 
     return json({
       success: true,
       count: slackMembers.length,
-      members: membersWithSlackProfiles,
+      members: slackMembers.map(u => ({
+        id: u.id,
+        name: u.name,
+        slackId: u.slackId,
+        profileImage: u.profilePicture,
+        signedUpAt: u.createdAt,
+      })),
     });
   } catch (error) {
     console.error('❌ Error fetching members:', error);
